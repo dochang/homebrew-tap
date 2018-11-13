@@ -1,0 +1,56 @@
+language: ruby
+# rubocop (>= 0.51.0) depends on ruby (>= 2.1.0)
+#
+# https://github.com/bbatsov/rubocop/blob/v0.51.0/CHANGELOG.md#changes
+# https://github.com/bbatsov/rubocop/pull/4787
+rvm:
+  - 2.1.0
+cache:
+  bundler: true
+
+addons:
+  apt:
+    package:
+      - build-essential
+      - curl
+      - file
+      - git
+
+env:
+  global:
+    - HOMEBREW_PREFIX=$HOME/.linuxbrew
+    - HOMEBREW_REPOSITORY=$HOMEBREW_PREFIX/Homebrew
+    - HOMEBREW_DEVELOPER=1
+    - HOMEBREW_NO_AUTO_UPDATE=1
+    - HOMEBREW_FORCE_VENDOR_RUBY=1
+    - secure: "Jk8g9aDzImBPlAtf347f1PvBkl8GTpsCOjiJEyyWWNVmwJnbpeEuK7/WFL5cHfMEMiPwekVSI1iaBmOR/lPrKvGP/hSpC4zOdEtsxORx9jVzKtwwFQLnVzdEq0vhSSoseQJs4teVKsd6jhO3bUpYbG1QHuAOvT1Xye7x7hc+3kehYvdx+VGT5z2kISr/zOw/dRsCIChzTVmrBDydZMCqO26sarfcILWkHWZuiRr0nRhcNcsqOIcUpjQ7xjv4hMHgtYVSS67+RlsHsqkD+dcp6GYMnXoNxE/I8yX/R9n3tXE/a9Cw/aqgl6YTJ+Ew4c3PAib3QHZBN3TA675H2twHOT3G2ksqNCLViv01oBEBK7DSw35sZcedhguilg85L0A0xbl6i/7r4BwtQIxbbWGIVNEkcVK6nZLgAMRIFSGnmboXYpCu47SYQSbmO+pkVJUUQXtWEXXYIhZ82Xk2N0+ZdtPEbbSwwaNXI5YpVtAV46vMpTwFO4Di0wghF5S8WgYVhzWkqogsTJxxd+TPuy9Jz+nwia9/Uyzz5vZs/OtmC6aTEGiHBoKHaNN1ruLnCvAKDmIvUtpYhbWoWW5hHE4umUaC+U0AUfsg873mO4CnkmBpE2TJ90oe0ZTcZNWwfKp2v7kfPYFFDRw9hLm1L/2n8EjzW+ncwxrJGSHpac5XcAY="
+
+before_install:
+  - sudo rm -rf /opt/pyenv $HOME/.phpenv /usr/local/clang*
+  # Fix "\"config\" scripts exist outside your system or Homebrew directories."
+  # warning.
+  - rm -rf $HOMEBREW_PREFIX
+  - git clone https://github.com/Linuxbrew/brew.git $HOMEBREW_REPOSITORY
+  - mkdir $HOMEBREW_PREFIX/bin
+  - ln -s $HOMEBREW_REPOSITORY/bin/brew $HOMEBREW_PREFIX/bin/brew
+  - export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
+  - HOMEBREW_TAP_NAME="${TRAVIS_REPO_SLUG/homebrew-}"
+  - HOMEBREW_TAP_DIR="$(brew --repo $HOMEBREW_TAP_NAME)"
+  - rm -rf "$HOMEBREW_TAP_DIR"
+  - mkdir -p $(dirname "$HOMEBREW_TAP_DIR")
+  - ln -s "$TRAVIS_BUILD_DIR" "$HOMEBREW_TAP_DIR"
+  - ulimit -n 1024
+  # Ensure bundler installed
+  #
+  # https://github.com/travis-ci/travis-ci/issues/5578#issuecomment-188513842
+  - export PATH="$(ruby -rubygems -e 'puts Gem.user_dir')/bin:$PATH"
+  - gem update --user-install
+  - gem install --user-install bundler
+
+before_script:
+  - '[ ! -d Formula ] || chmod -R go-w Formula'
+  # Fix "Incorrect file permissions (664)" error from `brew audit`.
+
+script:
+  - bundle exec rubocop
+  - brew test-bot
