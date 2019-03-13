@@ -8,14 +8,14 @@ class Croc < Formula
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = HOMEBREW_CACHE/"go_cache"
+    ENV["GOPATH"] = "#{HOMEBREW_CACHE}/go_cache"
     ENV["CGO_ENABLED"] = "0"
 
-    system "go", "build", "-o", bin/"croc", "-ldflags", "-s -w -X main.Version=v#{version}"
+    system "go", "build", "-o", "#{bin}/croc", "-ldflags", "-s -w -X main.Version=v#{version}"
     prefix.install_metafiles
   end
 
   test do
-    system bin/"croc", "--version"
+    system "#{bin}/croc", "--version"
   end
 end
