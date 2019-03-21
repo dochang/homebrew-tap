@@ -1,6 +1,7 @@
 Linuxbrew Tap
 =============
 
+[![Build Status](https://cloud.drone.io/api/badges/dochang/homebrew-tap/status.svg)](https://cloud.drone.io/dochang/homebrew-tap)
 [![Build Status](https://travis-ci.org/dochang/homebrew-tap.svg?branch=master)](https://travis-ci.org/dochang/homebrew-tap)
 
 This tap provides some softwares used by me.
